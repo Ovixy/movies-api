@@ -7,7 +7,8 @@ const db = mysql.createConnection ({
     host:"localhost",
     user:"root",
     password:"alexandru95",
-    database:"test"
+    database:"test",
+    port: 3310
 })
 
 app.get("/",(req,res) =>{
@@ -16,8 +17,11 @@ app.get("/",(req,res) =>{
 
 
 app.get("/movies", (req,res) => {
-    const q = "SELECT * FROM test.movies"
+    const q = "SELECT * FROM movies"
+    console.log("123")
     db.query(q,(err,data)=>{
+        console.log(data)
+        console.log(err)
         if(err) return res.json(err)
         return res.json(data)
     })
