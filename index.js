@@ -30,6 +30,27 @@ app.get("/movies", (req,res) => {
     })
 })
 
+//Get operation by ID
+
+app.get('/movies/:id', (req, res) => {
+    const movieId = req.params.id;
+
+    const query = 'SELECT * FROM movies WHERE id = ?';
+
+    db.query(query, [movieId], (err, results) => {
+        if (err) {
+            console.error('Error', err);
+            res.status(500).send('Internal Server Error');
+        } else {
+            if (results.length === 0) {
+                res.status(404).send('Movie not found');
+            } else {
+                res.status(200).json(results[0]);
+            }
+        }
+    });
+});
+
 //Post operation
 
 
