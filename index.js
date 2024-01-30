@@ -11,10 +11,13 @@ const db = mysql.createConnection ({
     port: 3310
 })
 
+app.use(express.json())
+
 app.get("/",(req,res) =>{
     res.json("hello im ovidiu")
 })
 
+// Get operation
 
 app.get("/movies", (req,res) => {
     const q = "SELECT * FROM movies"
@@ -27,15 +30,64 @@ app.get("/movies", (req,res) => {
     })
 })
 
-app.post("/movies", (req,res) =>{
-    const q = "Insert into Movies('title','desc','cover') VALUES(?)"
-    const values = ("title1","desc1","cover")
+//Post operation
 
-    db.query(q,[values], (err,data) =>{
-        if(err) return res.json(err)
-        return res.json(data)
-    })
-})
+
+app.post("/movies", (req, res) => {
+    const q = "INSERT INTO movies (`idmovies`, `title`, `Description`, `cover`) VALUES (?, ?, ?, ?)";
+    const values = [
+        req.body.idmovies, 
+        req.body.title,
+        req.body.Description, 
+        req.body.cover
+    ];
+
+    db.query(q, values, (err, data) => {
+        if (err) return res.json(err);
+        return res.json("Movie has been added");
+    });
+});
+
+//Update operation
+
+app.put("/movies/:id", (req, res) => {
+    const movieId = req.params.id;
+    const { title, Description, cover } = req.body;
+
+    if (!title && !Description && !cover) {
+        return res.status(400).json("At least one field (title, Description, cover) is required for update");
+    }
+
+    const q = "UPDATE movies SET title = ?, Description = ?, cover = ? WHERE idmovies = ?";
+    const values = [title, Description, cover, movieId];
+
+    db.query(q, values, (err, data) => {
+        if (err) return res.json(err);
+
+        if (data.affectedRows === 0) {
+            return res.status(404).json("Movie not found");
+        }
+
+        return res.json("Movie has been updated");
+    });
+});
+
+//Delete operation
+
+app.delete("/movies/:id", (req, res) => {
+    const movieId = req.params.id;
+    const q = "DELETE FROM movies WHERE idmovies = ?";
+
+    db.query(q, [movieId], (err, data) => {
+        if (err) return res.json(err);
+        
+        if (data.affectedRows === 0) {
+            return res.status(404).json("Movie not found");
+        }
+
+        return res.json("Movie has been deleted");
+    });
+});
 
 app.listen(8000,() => {
     console.log("Connected to backend")
